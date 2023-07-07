@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Set API key
-api_key = 'YOUR_OPENAI_API_KEY_HERE'
+api_key = config.API_KEY
 
 # Set default chat model
 chat_model = 'gpt-3.5-turbo-16k'
