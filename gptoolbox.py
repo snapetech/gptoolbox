@@ -82,9 +82,45 @@ else:
         else:
             print("Invalid selection. Please enter a valid number or leave it blank for the default model.")
 
-
 # Initialize an empty list to hold the code snippets
 code_buffer = []
+
+def generate_image(filename):
+    image_prompt = input("Enter the prompt for the image: ")
+    image_size = input("Enter the image size (e.g., 1024x1024): ")
+    try:
+        # Make request to the OpenAI API for image generation
+        url = "https://api.openai.com/v1/images/generations"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        data = {
+            "prompt": image_prompt,
+            "n": 1,
+            "size": image_size
+        }
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        image_data = response.json()['data'][0]
+        image_url = image_data['url']
+        print("Generated image:", image_url)
+
+        # Prompt user for filename to save the image
+        image_filename = filename if filename else "generated_image.jpg"
+
+        # Download and save the image
+        image_response = requests.get(image_url)
+        with open(image_filename, 'wb') as image_file:
+            image_file.write(image_response.content)
+        print(f"Image saved as {image_filename}")
+
+    except requests.exceptions.HTTPError as error:
+        print("HTTP Error occurred:", error)
+        traceback.print_exc()
+    except requests.exceptions.RequestException as error:
+        print("An error occurred:", error)
+        traceback.print_exc()
 
 while True:
     user_input = input("You: ")
@@ -119,6 +155,16 @@ while True:
                 print("Invalid file name. Please provide a valid file name.")
         continue
 
+    # Check for image command
+    if user_input.lower().startswith('image:'):
+        _, filename = user_input.split(':')
+        filename = filename.strip()
+        if filename:
+            generate_image(filename)
+        else:
+            print("Invalid filename. Please provide a valid filename.")
+        continue
+
     try:
         # Make request to GPT-3 and append the generated code to the code buffer
         url = f"https://api.openai.com/v1/chat/completions"
@@ -140,7 +186,3 @@ while True:
         code_buffer.append(generated_message)
     except requests.exceptions.HTTPError as error:
         print("HTTP Error occurred:", error)
-        traceback.print_exc()
-    except requests.exceptions.RequestException as error:
-        print("An error occurred:", error)
-        traceback.print_exc()
