@@ -3,16 +3,85 @@ import logging
 import traceback
 import json
 import sys
+import os.path
+from termcolor import colored
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Set API key
-api_key = config.API_KEY
+# Check if config.py exists
+if not os.path.isfile('config.py'):
+    # Prompt user for API key
+    api_key = input("Enter your API key: ")
 
-# Set default chat model
-chat_model = 'gpt-3.5-turbo-16k'
+    # Create and populate config.py with the API key
+    with open('config.py', 'w') as config_file:
+        config_file.write(f"API_KEY = '{api_key}'")
+else:
+    # Load API key from config.py
+    import config
+    api_key = config.API_KEY
+
+# Function to probe the endpoint and check its status
+def probe_endpoint(endpoint):
+    try:
+        url = f"https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        data = {
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "test"}
+            ],
+            "model": endpoint,
+        }
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        return True
+    except requests.exceptions.HTTPError as error:
+        return False
+    except requests.exceptions.RequestException as error:
+        return False
+
+# Define available models and their corresponding endpoints
+models = {
+    'gpt-3.5-turbo': 'gpt-3.5-turbo',
+    'gpt-3.5-turbo-0613': 'gpt-3.5-turbo-0613',
+    'gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
+    'gpt-3.5-turbo-16k-0613': 'gpt-3.5-turbo-16k-0613',
+    'gpt-4': 'gpt-4',
+    'gpt-4-0613': 'gpt-4-0613',
+    'gpt-4-32k': 'gpt-4-32k',
+    'gpt-4-32k-0613': 'gpt-4-32k-0613',
+}
+
+# Check if there's only one model defined
+if len(models) == 1:
+    chat_model = list(models.values())[0]
+else:
+    print("Available models:")
+    default_model = 'gpt-3.5-turbo'
+    for key, value in models.items():
+        status = probe_endpoint(value)
+        status_label = colored("*ACTIVE*", "green") if status else colored("*INACTIVE*", "red")
+        default = "(Default)" if value == default_model else ""
+        print(f"{value} {status_label} {default}")
+
+    while True:
+        selection = input("Select a model by entering its number: ")
+
+        if selection.isdigit() and 1 <= int(selection) <= len(models):
+            chat_model = list(models.values())[int(selection) - 1]
+            break
+        elif selection.strip() == "":
+            chat_model = models[default_model]
+            break
+        else:
+            print("Invalid selection. Please enter a valid number or leave it blank for the default model.")
+
 
 # Initialize an empty list to hold the code snippets
 code_buffer = []
@@ -52,19 +121,21 @@ while True:
 
     try:
         # Make request to GPT-3 and append the generated code to the code buffer
-        url = f"https://api.openai.com/v1/engines/{chat_model}/completions"
+        url = f"https://api.openai.com/v1/chat/completions"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
         }
         data = {
-            "prompt": user_input,
-            "max_tokens": 100,
-            "n": 1
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_input}
+            ],
+            "model": chat_model,
         }
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
-        generated_message = response.json()['choices'][0]['text']
+        generated_message = response.json()['choices'][0]['message']['content']
         print("AI: ", generated_message)
         code_buffer.append(generated_message)
     except requests.exceptions.HTTPError as error:
