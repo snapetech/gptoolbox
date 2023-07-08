@@ -1,5 +1,7 @@
 # gptoolbox
-Python Interface for OpenAI API's like ChatGPT 3.5 or 4
+Python Interface for OpenAI API's like ChatGPT 3.5 or 4.
+
+Chat with ChatGPT via console!
 
 This is a first iteration of a python application to connect to and interface with ChatGPT 3.5, and eventually other chat models like GPT 4, Dall-E, and Whisper.
 
