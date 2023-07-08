@@ -7,6 +7,8 @@ This is a first iteration of a python application to connect to and interface wi
 
 First major feature is that any code-snippets output by GPT will be buffered and collated.  When the output is complete, the user can save the codebox snippet using the commands as per below;
 
+To Install : clone this repo, then run $python gptoolbox.py
+
 Current state connects to gpt-3.5-turbo-16k by default.
 - switch:<gpt-model> typed from the chat interface will switch to the specified model.
 - save:filename.txt will save the most recent code-box as the specified file.
