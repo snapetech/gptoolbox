@@ -11,5 +11,6 @@ Current state connects to gpt-3.5-turbo-16k by default.
 - switch:<gpt-model> typed from the chat interface will switch to the specified model.
 - save:filename.txt will save the most recent code-box as the specified file.
 - exit: will exit the chat, also works direct from API using just 'exit', placeholder command with : for future intentions.
+- image:<filename.jpg> will generate a prompt asking what the image should be, details provided dictate image generation, result is captured.
 - selection screen uses common endpoints on common path, then probes each endpoint for error or valid api response.  
 - **NOTE** the above means that api calls are being used to valid endpoint status.  This could be improved upon.
