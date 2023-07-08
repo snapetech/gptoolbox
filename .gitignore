@@ -1,0 +1,6 @@
+#ignore config.py for reupload
+*config.py
+beta_*
+__pycache__
+/__pycache__
+.gitignore
