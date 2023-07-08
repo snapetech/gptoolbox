@@ -1,2 +1,4 @@
 #ignore config.py for reupload
 config.py
+__pycache__
+/__pycache__
