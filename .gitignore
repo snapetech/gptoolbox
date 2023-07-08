@@ -4,3 +4,6 @@ beta_*
 __pycache__
 /__pycache__
 .gitignore
+*.jpg
+*.png
+*.gif
